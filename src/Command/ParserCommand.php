@@ -33,8 +33,7 @@ class ParserCommand extends Command
     {
         $this
             ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
-            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
-        ;
+            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -45,24 +44,20 @@ class ParserCommand extends Command
         @$doc->loadHTML($content);
         $xpath = new DOMXpath($doc);
 
-        if(!self::parsePage($xpath, $output))
-        {
+        if (!self::parsePage($xpath, $output)) {
             $output->writeln("Can`t parse page #1");
             return Command::FAILURE;
         }
 
         $amountOfPages = self::getNumberOfLastPage($xpath);
-        if($amountOfPages > 1)
-        {
-            for($page = 2; $page <= $amountOfPages; $page ++)
-            {
+        if ($amountOfPages > 1) {
+            for ($page = 2; $page <= $amountOfPages; $page++) {
                 $content = file_get_contents("https://etp.eltox.ru/registry/procedure/page/$page?type=1");
 
                 @$doc->loadHTML($content);
                 $xpath = new DOMXpath($doc);
 
-                if(!self::parsePage($xpath, $output))
-                {
+                if (!self::parsePage($xpath, $output)) {
                     $output->writeln("Can`t parse page #$page");
                     return Command::FAILURE;
                 }
@@ -76,8 +71,7 @@ class ParserCommand extends Command
     {
         $elements = $xpath->query("/html/body/div[3]/div/div/div/div/div[3]/div/div/ul/li[12]/a");
 
-        if(!$elements)
-        {
+        if (!$elements) {
             return 0;
         }
 
@@ -88,8 +82,7 @@ class ParserCommand extends Command
     {
         $elements = $xpath->query("$procedureXpath/table/tbody/tr[1]/td[2]/dl/dt/a");
 
-        if(!$elements || !is_object($elements->item(0)))
-        {
+        if (!$elements || !is_object($elements->item(0))) {
             return null;
         }
 
@@ -104,8 +97,7 @@ class ParserCommand extends Command
     {
         $elements = $xpath->query("$procedureXpath/table/tbody/tr[1]/td[2]/dl/dt/span");
 
-        if(!$elements || !is_object($elements->item(0)))
-        {
+        if (!$elements || !is_object($elements->item(0))) {
             return null;
         }
 
@@ -120,8 +112,7 @@ class ParserCommand extends Command
     {
         $elements = $xpath->query("$procedureXpath/table/tbody/tr[1]/td[2]/dl/dt/a");
 
-        if(!$elements || !is_object($elements->item(0)))
-        {
+        if (!$elements || !is_object($elements->item(0))) {
             return null;
         }
 
@@ -139,8 +130,7 @@ class ParserCommand extends Command
 
         $elements = $xpath->query($emailXpath);
 
-        if(!$elements || !is_object($elements->item(0)))
-        {
+        if (!$elements || !is_object($elements->item(0))) {
             return null;
         }
 
@@ -164,10 +154,9 @@ class ParserCommand extends Command
         $innerXpath = new DOMXpath($innerDoc);
 
         $email = self::getEmail($innerXpath);
-        if(!$email)
-        {
+        if (!$email) {
             $output->writeln("Can`t find email");
-        }else {
+        } else {
             $procedure->setEmail($email);
             $output->writeln(sprintf(
                 "Email: %s",
@@ -184,8 +173,7 @@ class ParserCommand extends Command
         $mainLink = "https://etp.eltox.ru";
         $elements = $xpath->query($proceduresXpath);
 
-        if(!$elements)
-        {
+        if (!$elements) {
             return false;
         }
 
@@ -199,8 +187,7 @@ class ParserCommand extends Command
             $procedureXpath = $element->getNodePath();
 
             $procedureNumber = self::getProcedureNumber($xpath, $procedureXpath);
-            if(!$procedureNumber)
-            {
+            if (!$procedureNumber) {
                 $output->writeln("Can`t find procedure number");
             } else {
                 $procedure->setNumber($procedureNumber);
@@ -211,10 +198,9 @@ class ParserCommand extends Command
             }
 
             $OOSNumber = self::getOOSNumber($xpath, $procedureXpath);
-            if(!$OOSNumber)
-            {
+            if (!$OOSNumber) {
                 $output->writeln("Can`t find OOS procedure number");
-            }else {
+            } else {
                 $procedure->setOosNumber($OOSNumber);
                 $output->writeln(sprintf(
                     "OOS procedure number: %d",
@@ -223,10 +209,9 @@ class ParserCommand extends Command
             }
 
             $procedureLink = self::getProcedureLink($xpath, $procedureXpath);
-            if(!$procedureLink)
-            {
+            if (!$procedureLink) {
                 $output->writeln("Can`t find OOS procedure number");
-            }else {
+            } else {
                 $fullProcedureLink = $mainLink . $procedureLink;
                 $procedure->setLink($fullProcedureLink);
                 $output->writeln(sprintf(
@@ -235,9 +220,9 @@ class ParserCommand extends Command
                 ));
 
                 $procedure = self::getInfoFromProcedurePage($fullProcedureLink, $procedure, $output);
-
-                $this->procedureRepository->save($procedure);
             }
+
+            $this->procedureRepository->save($procedure);
 
             $output->writeln([
                 '================',
